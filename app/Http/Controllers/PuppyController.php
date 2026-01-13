@@ -21,7 +21,8 @@ class PuppyController extends Controller
                             ->orWhere('trait', 'like', "%{$search}%");
                     })
                     ->with(['user', 'likedBy'])
-                    ->get()
+                    ->paginate(6)
+                    ->withQueryString()
             ),
             'filters' => [
                 'search' => $search
@@ -33,6 +34,23 @@ class PuppyController extends Controller
     {
         sleep(3); // Simulate processing delay
         $puppy->likedBy()->toggle($request->user()->id);
+        return back();
+    }
+
+    public function store(Request $request)
+    {
+        dd($request->all());
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'trait' => 'required|string|max:255',
+        ]);
+
+        $puppy = new Puppy();
+        $puppy->name = $request->name;
+        $puppy->trait = $request->trait;
+        $puppy->user_id = $request->user()->id;
+        $puppy->save();
+
         return back();
     }
 }

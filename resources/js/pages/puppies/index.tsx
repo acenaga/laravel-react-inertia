@@ -7,16 +7,16 @@ import { PuppiesList } from "@/components/PuppiesList";
 import { NewPuppyForm } from "@/components/NewPuppyForm";
 import { useState } from "react";
 
-import { Filters, Puppy, SharedData } from "@/types";
+import { Filters, PaginatedResponse, Puppy, SharedData } from "@/types";
 import { usePage } from "@inertiajs/react";
 
 
-export default function App({ puppies, filters }: { puppies: Puppy[]; filters: Filters }) {
+export default function App({ puppies, filters }: { puppies: PaginatedResponse<Puppy>; filters: Filters }) {
     return (
         <PageWrapper>
             <Container>
                 <Header />
-                <Main intertiaPuppies={puppies} filters={filters} />
+                <Main paginatedPuppies={puppies} filters={filters} />
             </Container>
         </PageWrapper>
 
@@ -25,8 +25,7 @@ export default function App({ puppies, filters }: { puppies: Puppy[]; filters: F
 
 
 
-function Main({ intertiaPuppies, filters }: { intertiaPuppies: Puppy[]; filters: Filters }) {
-    const [puppies, setPuppies] = useState<Puppy[]>(intertiaPuppies);
+function Main({ paginatedPuppies, filters }: { paginatedPuppies: PaginatedResponse<Puppy>; filters: Filters }) {
     const { auth } = usePage<SharedData>().props;
     return (
         <main>
@@ -36,15 +35,17 @@ function Main({ intertiaPuppies, filters }: { intertiaPuppies: Puppy[]; filters:
                 <Search filters={filters} />
                 {/* Shortlist */}
                 {auth.user && (
-                    <Shortlist puppies={intertiaPuppies} />
+                    <Shortlist puppies={paginatedPuppies.data} />
                 )}
             </div>
             {/* Puppies list */}
             <PuppiesList
-                puppies={intertiaPuppies}
+                puppies={paginatedPuppies}
             />
             {/* New Puppy form */}
-            <NewPuppyForm puppies={intertiaPuppies} setPuppies={setPuppies} />
+            {auth.user &&(
+                <NewPuppyForm />
+            )}
         </main>
 
     )

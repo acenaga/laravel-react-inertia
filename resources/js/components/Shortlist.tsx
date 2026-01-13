@@ -11,7 +11,7 @@ export function Shortlist({
     const { auth } = usePage<SharedData>().props;
     return (
         <div>
-            <h2 className="flex items-center gap-2 font-medium">
+            <h2 className="flex items-center gap-2 font-medium text-slate-700">
                 <span>Your shortlist</span>
                 <Heart
                     className={"fill-pink-500 stroke-none"}

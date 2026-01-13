@@ -1,75 +1,70 @@
-import { Dispatch, useState } from "react"
-import { Puppy } from "../types"
+import { useForm } from "@inertiajs/react";
+import { store } from "@/routes/puppies";
 import { useFormStatus } from "react-dom";
-import { createPuppy } from "../queries";
-import { ErrorBoundary } from "react-error-boundary";
 
-export function NewPuppyForm({
-    puppies,
-    setPuppies
-}: {
-    puppies: Puppy[];
-    setPuppies: Dispatch<React.SetStateAction<Puppy[]>>
-}) {
-    const [error, setError] = useState({});
+
+
+export function NewPuppyForm() {
+    const { post, setData, data } = useForm({
+        name: '',
+        trait: '',
+        image: null as File | null,
+    });
     return (
-        <div className="mt-12 flex items-center justify-between bg-white p-8 shadow ring ring-black/5">
-            <ErrorBoundary fallbackRender={({error}) => <div> {JSON.stringify(error, null, 2)} </div>}>
-                <form
-                    className="mt-4 flex w-full flex-col items-start gap-4"
-                    action={async (formData: FormData) => {
-                        const response = await createPuppy(formData)
-                        if(response.errors){
-                            setError(response.errors);
-                        }
-                        if(response.data){
-                            setPuppies([...puppies, response.data]);
-                        }
-
-                    }}
-                >
-                    <div className="grid w-full gap-6 md:grid-cols-3">
-                        <fieldset className="flex w-full flex-col gap-1">
-                            <label htmlFor="name">Name</label>
-                            <input
-                                required
-                                className="max-w-96 rounded-sm bg-white px-2 py-1 ring ring-black/20 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-                                id="name"
-                                type="text"
-                                name="name"
-                            />
-                            {error?.name && (
-                                <span className="text-sm text-red-600">{error.name}</span>
-                            )}
-                        </fieldset>
-                        <fieldset className="flex w-full flex-col gap-1">
-                            <label htmlFor="trait">Personality trait</label>
-                            <input
-                                required
-                                className="max-w-96 rounded-sm bg-white px-2 py-1 ring ring-black/20 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-                                id="trait"
-                                type="text"
-                                name="trait"
-                            />
-                            {error?.trait && (
-                                <span className="text-sm text-red-600">{error.trait}</span>
-                            )}
-                        </fieldset>
-                        <fieldset
-                            className="col-span-2 flex w-full flex-col gap-1"
-                        >
-                            <label htmlFor="image_url">Profile pic</label>
-                            <input
-                                className="max-w-96 rounded-sm bg-white px-2 py-1 ring ring-black/20 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
-                                id="image_url"
-                                type="file"
-                                name="image_url"
-                            />
-                        </fieldset>
-                    </div>
-                    <SubmitButton />
-                </form>
-            </ErrorBoundary>
+        <div className="mt-12 flex items-center justify-between bg-white p-8 shadow ring ring-black/5 text-slate-700">
+            <form
+                className="mt-4 flex w-full flex-col items-start gap-4"
+                onSubmit={async (e) => {
+                    e.preventDefault();
+                    post(store().url, {
+                        preserveScroll: true,
+                    });
+                }}
+            >
+                <div className="grid w-full gap-6 md:grid-cols-3">
+                    <fieldset className="flex w-full flex-col gap-1">
+                        <label htmlFor="name">Name</label>
+                        <input
+                            required
+                            className="max-w-96 rounded-sm bg-white px-2 py-1 ring ring-black/20 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            id="name"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            type="text"
+                            name="name"
+                        />
+                    </fieldset>
+                    <fieldset className="flex w-full flex-col gap-1">
+                        <label htmlFor="trait">Personality trait</label>
+                        <input
+                            required
+                            className="max-w-96 rounded-sm bg-white px-2 py-1 ring ring-black/20 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            id="trait"
+                            value={data.trait}
+                            onChange={(e) => setData('trait', e.target.value)}
+                            type="text"
+                            name="trait"
+                        />
+                    </fieldset>
+                    <fieldset
+                        className="col-span-2 flex w-full flex-col gap-1"
+                    >
+                        <label htmlFor="image">Profile pic</label>
+                        <input
+                            required
+                            className="max-w-96 rounded-sm bg-white px-2 py-1 ring ring-black/20 focus:ring-2 focus:ring-cyan-500 focus:outline-none"
+                            id="image"
+                            type="file"
+                            name="image"
+                            accept="image/*"
+                            onChange={(e) => {
+                                setData('image', e.target.files ? e.target.files[0] : null);
+                            }}
+                        />
+                    </fieldset>
+                </div>
+                <SubmitButton />
+            </form>
         </div>
     )
 }
