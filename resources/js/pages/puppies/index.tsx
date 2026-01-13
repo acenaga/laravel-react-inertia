@@ -7,16 +7,16 @@ import { PuppiesList } from "@/components/PuppiesList";
 import { NewPuppyForm } from "@/components/NewPuppyForm";
 import { useState } from "react";
 
-import { Puppy, SharedData } from "@/types";
+import { Filters, Puppy, SharedData } from "@/types";
 import { usePage } from "@inertiajs/react";
 
 
-export default function App({ puppies }: { puppies: Puppy[] }) {
+export default function App({ puppies, filters }: { puppies: Puppy[]; filters: Filters }) {
     return (
         <PageWrapper>
             <Container>
                 <Header />
-                <Main intertiaPuppies={puppies} />
+                <Main intertiaPuppies={puppies} filters={filters} />
             </Container>
         </PageWrapper>
 
@@ -25,8 +25,7 @@ export default function App({ puppies }: { puppies: Puppy[] }) {
 
 
 
-function Main({ intertiaPuppies }: { intertiaPuppies: Puppy[] }) {
-    const [searchQuery, setSearchQuery] = useState("");
+function Main({ intertiaPuppies, filters }: { intertiaPuppies: Puppy[]; filters: Filters }) {
     const [puppies, setPuppies] = useState<Puppy[]>(intertiaPuppies);
     const { auth } = usePage<SharedData>().props;
     return (
@@ -34,15 +33,14 @@ function Main({ intertiaPuppies }: { intertiaPuppies: Puppy[] }) {
             {/* Search & Shortlist */}
             <div className="mt-24 grid gap-8 sm:grid-cols-2">
                 {/* Search */}
-                <Search searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+                <Search filters={filters} />
                 {/* Shortlist */}
                 {auth.user && (
-                    <Shortlist puppies={intertiaPuppies} setPuppies={setPuppies} />
+                    <Shortlist puppies={intertiaPuppies} />
                 )}
             </div>
             {/* Puppies list */}
             <PuppiesList
-                searchQuery={searchQuery}
                 puppies={intertiaPuppies}
             />
             {/* New Puppy form */}
