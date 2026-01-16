@@ -27,6 +27,12 @@ export interface SharedData {
     quote: { message: string; author: string };
     auth: Auth;
     sidebarOpen: boolean;
+    flash: {
+        success?: string;
+        error?: string;
+        warning?: string;
+        info?: string;
+    };
     [key: string]: unknown;
 }
 
@@ -42,24 +48,28 @@ export interface User {
     [key: string]: unknown; // This allows for additional properties...
 }
 
-export interface Puppy  {
+export interface Puppy {
     id: number;
     name: string;
     trait: string;
     imageUrl: string;
-    likedBy: User["id"][];
     user: Pick<User, 'id' | 'name'>;
-};
+    likedBy: User['id'][];
+    can: {
+        delete: boolean;
+        update: boolean;
+    };
+}
 
-export interface Filters{
+export interface Filters {
     search?: string;
     [key: string]: unknown;
 }
 
 export interface PaginationLink {
-  url: string | null;
-  label: string;
-  active: boolean;
+    url: string | null;
+    label: string;
+    active: boolean;
 }
 
 export interface PaginationMeta {

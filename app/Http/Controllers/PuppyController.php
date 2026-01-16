@@ -12,9 +12,14 @@ use App\Actions\OptimizeWebpImageAction;
 
 class PuppyController extends Controller
 {
+    //------------------------
+    // show all puppies
+    //------------------------
     public function index(Request $request)
     {
+
         $search = $request->search;
+        $request->session()->flash('info', 'You have arrived at the puppy index page!');
         return Inertia::render('puppies/index', [
             'puppies' => PuppyResource::collection(
                 //Puppy::all()->load(['user', 'likedBy']),
@@ -28,11 +33,17 @@ class PuppyController extends Controller
                     ->paginate(6)
                     ->withQueryString()
             ),
+            'likedPuppies' => $request->user()
+                ? PuppyResource::collection($request->user()->likedPuppies)
+                : [],
             'filters' => [
                 'search' => $search
             ]
         ]);
     }
+    //------------------------
+    // like function
+    //------------------------
 
     public function like(Request $request, Puppy $puppy)
     {
@@ -40,6 +51,9 @@ class PuppyController extends Controller
         $puppy->likedBy()->toggle($request->user()->id);
         return back();
     }
+    //------------------------
+    // Store
+    //------------------------
 
     public function store(Request $request)
     {
@@ -71,6 +85,77 @@ class PuppyController extends Controller
             'image_url' => $image_url,
         ]);
 
-        return back()->with('success', 'Puppy created successfully!');
+        return redirect()->route('home', ['page' => 1])->with('success', 'Puppy created successfully!');
+    }
+
+    //------------------------
+    // Delete
+    //------------------------
+    public function destroy(Request $request, Puppy $puppy)
+    {
+        if ($request->user()->cannot('delete', $puppy)) {
+            return back()
+                ->withErrors(['error' => 'You are not authorized to delete this puppy.']);
+        }
+        sleep(3); // Simulate processing delay
+
+        // Authorization check (assuming you have a policy set up)
+        //$this->authorize('delete', $puppy);
+
+        // Delete the image from storage if it exists
+        if ($puppy->image_url) {
+            $imagePath = str_replace('/storage/', '', $puppy->image_url);
+            Storage::disk('public')->delete($imagePath);
+        }
+
+        // Delete the puppy record
+        $puppy->delete();
+
+        return redirect()
+            ->route('home', ['page' => 1])
+            ->with('warning', 'Puppy deleted successfully!');
+    }
+
+    //------------------------
+    // Update
+    //------------------------
+    public function update(Request $request, Puppy $puppy)
+    {
+        sleep(1); // Simulate processing delay
+        if ($request->user()->cannot('update', $puppy)) {
+            return back()
+                ->withErrors(['error' => 'You are not authorized to update this puppy.']);
+        }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'trait' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
+        ]);
+
+        if ($request->hasFile('image')) {
+
+            // Delete the old image from storage if it exists
+            if ($puppy->image_url) {
+                $oldImagePath = str_replace('/storage/', '', $puppy->image_url);
+                if ($oldImagePath && Storage::disk('public')->exists($oldImagePath)) {
+                    Storage::disk('public')->delete($oldImagePath);
+                }
+            }
+
+            $optimized = (new OptimizeWebpImageAction())->handle($request->file('image'));
+
+            $path = 'puppies/' . $optimized['fileName'];
+            $stored = Storage::disk('public')->put($path, $optimized['webpString']);
+
+            if (!$stored) {
+                return back()->withErrors(['image' => 'Failed to upload image.']);
+            }
+            $puppy->image_url = Storage::url($path);
+        }
+        $puppy->name = $request->name;
+        $puppy->trait = $request->trait;
+        $puppy->save();
+        return back()
+            ->with('success', 'Puppy updated successfully!');
     }
 }

@@ -1,11 +1,9 @@
-import { useForm } from "@inertiajs/react";
-import { store } from "@/routes/puppies";
-import { useFormStatus } from "react-dom";
-import { useRef } from "react";
+import { ImageUploadPreview } from '@/components/ui/imageUploadPreview';
+import { store } from '@/routes/puppies';
+import { useForm } from '@inertiajs/react';
+import { useRef } from 'react';
 
-
-
-export function NewPuppyForm( { mainRef }: { mainRef?: React.RefObject<HTMLElement> }) {
+export function NewPuppyForm({ mainRef }: { mainRef?: React.RefObject<HTMLElement> }) {
     const { post, setData, data, errors, reset, processing } = useForm({
         name: '',
         trait: '',
@@ -13,7 +11,7 @@ export function NewPuppyForm( { mainRef }: { mainRef?: React.RefObject<HTMLEleme
     });
     const fileInputRef = useRef<HTMLInputElement>(null);
     return (
-        <div className="mt-12 flex items-center justify-between bg-white p-8 shadow ring ring-black/5 text-slate-700">
+        <div className="mt-12 flex items-center justify-between bg-white p-8 text-slate-700 shadow ring ring-black/5">
             <form
                 className="mt-4 flex w-full flex-col items-start gap-4"
                 onSubmit={async (e) => {
@@ -44,7 +42,7 @@ export function NewPuppyForm( { mainRef }: { mainRef?: React.RefObject<HTMLEleme
                             type="text"
                             name="name"
                         />
-                        {errors.name && <p className="text-xs mt-1 text-red-600">{errors.name}</p>}
+                        {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
                     </fieldset>
                     <fieldset className="flex w-full flex-col gap-1">
                         <label htmlFor="trait">Personality trait</label>
@@ -57,11 +55,9 @@ export function NewPuppyForm( { mainRef }: { mainRef?: React.RefObject<HTMLEleme
                             type="text"
                             name="trait"
                         />
-                        {errors.trait && <p className="text-xs mt-1 text-red-600">{errors.trait}</p>}
+                        {errors.trait && <p className="mt-1 text-xs text-red-600">{errors.trait}</p>}
                     </fieldset>
-                    <fieldset
-                        className="col-span-2 flex w-full flex-col gap-1"
-                    >
+                    <fieldset className="col-span-2 flex w-full flex-col gap-1">
                         <label htmlFor="image">Profile pic</label>
                         <input
                             // required
@@ -75,17 +71,18 @@ export function NewPuppyForm( { mainRef }: { mainRef?: React.RefObject<HTMLEleme
                                 setData('image', e.target.files ? e.target.files[0] : null);
                             }}
                         />
-                        {errors.image && <p className="text-xs mt-1 text-red-600">{errors.image}</p>}
+                        {errors.image && <p className="mt-1 text-xs text-red-600">{errors.image}</p>}
+                        <ImageUploadPreview className="self-start" source={data.image} />
                     </fieldset>
                 </div>
                 <button
-                    className="mt-4 inline-block rounded bg-cyan-300 px-4 py-2 font-medium text-cyan-900 hover:bg-cyan-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none disabled:bg-slate-200 disabled:cursor-not-allowed"
+                    className="mt-4 inline-block rounded bg-cyan-300 px-4 py-2 font-medium text-cyan-900 hover:bg-cyan-200 focus:ring-2 focus:ring-cyan-500 focus:outline-none disabled:cursor-not-allowed disabled:bg-slate-200"
                     type="submit"
                     disabled={processing}
                 >
-                    {processing ? `Adding ${data.name}...` : "Add puppy"}
+                    {processing ? `Adding ${data.name}...` : 'Add puppy'}
                 </button>
             </form>
         </div>
-    )
+    );
 }
